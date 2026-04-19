@@ -1,0 +1,289 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Journey Unbound | Mobility Design</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.7.1/gsap.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.7.1/ScrollTrigger.min.js"></script>
+    <style>
+        :root {
+            --warm-peach: #ff8c69;
+            --warm-beige: #fffaf0;
+            --text-dark: #1d1d1f;
+            --text-sub: #6e6e73;
+            --accent-orange: #e67e22;
+        }
+
+        body, html {
+            margin: 0; padding: 0;
+            background-color: var(--warm-beige);
+            color: var(--text-dark);
+            font-family: 'Pretendard', -apple-system, sans-serif;
+            overflow-x: hidden;
+        }
+
+        #canvas-container {
+            position: fixed;
+            top: 0; left: 0;
+            width: 100%; height: 100%;
+            z-index: 0;
+            pointer-events: none;
+        }
+
+        .content {
+            position: relative;
+            z-index: 1;
+        }
+
+        section {
+            min-height: 100vh;
+            display: grid;
+            grid-template-columns: 1.2fr 1.8fr;
+            align-items: center;
+            padding: 100px 10%; /* 상하단 여백 80px -> 100px로 증대 */
+            box-sizing: border-box;
+            gap: 60px;
+        }
+
+        /* 첫 번째 섹션(Hero)에 추가 여백 부여 */
+        section.hero {
+            padding-top: 180px; /* 맨 위 공간을 더 넉넉하게 확보 */
+            align-items: flex-start; /* 첫 화면은 상단 정렬로 여백 강조 */
+        }
+
+        .hero-text h1 {
+            font-size: clamp(3rem, 5vw, 4.5rem);
+            font-weight: 900;
+            line-height: 1.15;
+            margin-bottom: 24px;
+        }
+        .hero-text h1 span { color: var(--warm-peach); }
+        .hero-text p { font-size: 1.3rem; color: var(--text-sub); font-weight: 400; max-width: 500px; }
+
+        .glass-card {
+            background: rgba(255, 255, 255, 0.6);
+            backdrop-filter: blur(30px);
+            -webkit-backdrop-filter: blur(30px);
+            border-radius: 28px;
+            padding: 48px;
+            max-width: 680px;
+            border: 1px solid rgba(255, 255, 255, 0.4);
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.04);
+            margin-top: 20px;
+        }
+
+        .glass-card h3 { 
+            font-size: 2rem; 
+            margin-bottom: 20px; 
+            color: var(--text-dark);
+            display: flex;
+            align-items: center;
+        }
+        
+        .glass-card h3::before {
+            content: '';
+            width: 4px; height: 24px;
+            background: var(--warm-peach);
+            margin-right: 12px;
+            border-radius: 2px;
+        }
+
+        .problem-item { margin-bottom: 32px; }
+        .problem-item strong { display: block; font-size: 1.2rem; margin-bottom: 8px; color: var(--accent-orange); }
+        .problem-item p { margin: 0; line-height: 1.7; color: var(--text-sub); }
+
+        .cta-btn {
+            padding: 18px 48px;
+            background: var(--warm-peach);
+            color: white;
+            border: none;
+            border-radius: 14px;
+            font-size: 1.1rem;
+            font-weight: 700;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            margin-top: 40px;
+        }
+
+        .tag {
+            font-weight: 700;
+            color: var(--warm-peach);
+            margin-bottom: 12px;
+            letter-spacing: 0.05em;
+            display: block;
+        }
+
+        .photo-area {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 20px;
+            opacity: 0;
+            transform: translateY(40px);
+        }
+
+        .photo-item {
+            background-color: #f1f3f5;
+            border-radius: 20px;
+            aspect-ratio: 16/11;
+            overflow: hidden;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.03);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            color: var(--text-sub);
+            font-weight: 500;
+            transition: all 0.3s ease;
+            background-size: cover;
+            background-position: center;
+        }
+    </style>
+</head>
+<body>
+
+    <div id="canvas-container"></div>
+
+    <div class="content">
+        <section class="hero">
+            <div class="hero-text">
+                <span class="tag">Mobility Design Concept</span>
+                <h1>No More Pause,<br><span>Just Flow</span></h1>
+                <p>준비의 고민은 가볍게, 발걸음의 제약은 없도록</p>
+            </div>
+            <div class="photo-area">
+                <div class="photo-item">[Main Product Image]</div>
+                <div class="photo-item">[Usage Context]</div>
+            </div>
+        </section>
+
+        <section>
+            <div class="glass-card">
+                <span class="tag">01. The Problem</span>
+                <h3>무엇이 우리를 멈추게 하는가</h3>
+                <div class="problem-item">
+                    <strong>심리적 멈춤 (Psychological Pause)</strong>
+                    <p>"짐이 너무 많진 않을까? 가방은 뭘 써야 하지?" 준비 단계의 망설임과 피로.</p>
+                </div>
+                <div class="problem-item">
+                    <strong>물리적 멈춤 (Physical Pause)</strong>
+                    <p>계단, 거친 노면, 소음. 이동의 흐름을 끊는 모든 외부적 제약.</p>
+                </div>
+            </div>
+            <div class="photo-area">
+                <div class="photo-item">[Stairs/Hurdles]</div>
+                <div class="photo-item">[Rough Road/Noise]</div>
+            </div>
+        </section>
+
+        <section>
+            <div class="glass-card">
+                <span class="tag">02. The Solution</span>
+                <h3>가변형 모듈과 강성 제어</h3>
+                <div class="problem-item">
+                    <strong>오리가미 가변 구조</strong>
+                    <p>내용물의 양에 맞춰 스스로 부피를 조절합니다. 어떤 여정에도 최적화된 폼팩터.</p>
+                </div>
+                <div class="problem-item">
+                    <strong>상황 대응형 하드웨어</strong>
+                    <p>소프트 휠로 진동을 흡수하고, 정지 시 강성을 확보하여 휴식처로 변합니다.</p>
+                </div>
+            </div>
+            <div class="photo-area">
+                <div class="photo-item">[Mechanism View 1]</div>
+                <div class="photo-item">[Mechanism View 2]</div>
+            </div>
+        </section>
+
+        <section>
+            <div class="hero-text">
+                <span class="tag">03. Vision</span>
+                <h1>이동의 본질에<br>다시 집중하다</h1>
+                <p>즐거운 여행이 결코 '짐'이 되지 않는 미래를 설계합니다.</p>
+                <button class="cta-btn">Project Detail View</button>
+            </div>
+            <div class="photo-area" style="grid-template-columns: repeat(3, 1fr);">
+                <div class="photo-item">[Final A]</div>
+                <div class="photo-item">[Final B]</div>
+                <div class="photo-item">[Final C]</div>
+            </div>
+        </section>
+    </div>
+
+    <script>
+        const scene = new THREE.Scene();
+        const camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000);
+        const renderer = new THREE.WebGLRenderer({ antialias: true, alpha: true });
+        renderer.setSize(window.innerWidth, window.innerHeight);
+        document.getElementById('canvas-container').appendChild(renderer.domElement);
+
+        const textureLoader = new THREE.TextureLoader();
+        // 캐리어 이미지가 로드될 때까지 기다릴 수 있도록 임시 체크보드 텍스처 사용
+        const carrierTexture = textureLoader.load('https://threejs.org/examples/textures/uv_grid_opengl.jpg'); 
+
+        const geometry = new THREE.BoxGeometry(2, 3, 1.5); 
+        const material = new THREE.MeshPhongMaterial({
+            map: carrierTexture,
+            transparent: true,
+            opacity: 0.6,
+            shininess: 80,
+            emissive: 0x221100
+        });
+        
+        const carrierModel = new THREE.Mesh(geometry, material);
+        // 최상단 여백 확보를 위해 3D 모델의 초기 Y축 위치 하향 조정 (3 -> 2.5)
+        carrierModel.position.set(-4, 2.5, 0);
+        scene.add(carrierModel);
+
+        const partGeo = new THREE.BufferGeometry();
+        const partCount = 300;
+        const posArray = new Float32Array(partCount * 3);
+        for(let i=0; i<partCount*3; i++) posArray[i] = (Math.random()-0.5)*15;
+        partGeo.setAttribute('position', new THREE.BufferAttribute(posArray, 3));
+        const partMat = new THREE.PointsMaterial({ size: 0.02, color: 0xffe5b4, transparent: true, opacity: 0.4 });
+        const particles = new THREE.Points(partGeo, partMat);
+        scene.add(particles);
+
+        const light = new THREE.PointLight(0xffffff, 1, 100);
+        light.position.set(5, 5, 5);
+        scene.add(light);
+        scene.add(new THREE.AmbientLight(0xfffaf0, 0.7));
+
+        camera.position.z = 6;
+
+        gsap.registerPlugin(ScrollTrigger);
+
+        // 스크롤 시 회전 및 가변 연출
+        gsap.to(carrierModel.rotation, {
+            y: Math.PI * 2,
+            scrollTrigger: { trigger: ".content", start: "top top", end: "bottom bottom", scrub: 1.5 }
+        });
+        
+        // 섹션 등장 애니메이션
+        gsap.utils.toArray('section').forEach(section => {
+            gsap.from(section.querySelectorAll('.hero-text, .glass-card, .tag, .cta-btn'), {
+                opacity: 0, y: 40, duration: 1, stagger: 0.2,
+                scrollTrigger: { trigger: section, start: "top 80%" }
+            });
+            gsap.to(section.querySelector('.photo-area'), {
+                opacity: 1, y: 0, duration: 1.2,
+                scrollTrigger: { trigger: section, start: "top 65%" }
+            });
+        });
+
+        function animate() {
+            requestAnimationFrame(animate);
+            carrierModel.rotation.y += 0.001;
+            particles.rotation.y += 0.0005;
+            renderer.render(scene, camera);
+        }
+        animate();
+
+        window.addEventListener('resize', () => {
+            camera.aspect = window.innerWidth / window.innerHeight;
+            camera.updateProjectionMatrix();
+            renderer.setSize(window.innerWidth, window.innerHeight);
+        });
+    </script>
+</body>
+</html>
